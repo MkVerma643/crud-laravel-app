@@ -3,13 +3,13 @@
 namespace App\Http\Controllers;
 
 use Log;
-use App\Models\Category;
+use App\Models\Product;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
 
-class CategoryController extends Controller
+class ProductController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -19,7 +19,7 @@ class CategoryController extends Controller
     public function index()
     {
         //
-        return Category::select('id', 'title', 'description', 'image')->get();
+        return Product::select('id', 'title', 'description', 'image')->get();
     }
 
     /**
@@ -48,13 +48,13 @@ class CategoryController extends Controller
         ]);
 
         try {
-            $imageName = Str::random . '.' . $request->image->getClientOriginalExtension();
-            Storage::disk('public')->putFileAs('category/image', $request->image, $imageName);
-            Category::create($request->post() + ['image' => $imageName]);
+            $imageName = Str::random() . '.' . $request->image->getClientOriginalExtension();
+            Storage::disk('public')->putFileAs('Product/image', $request->image, $imageName);
+            Product::create($request->post() + ['image' => $imageName]);
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'category has been created successfully.' // for status 200
+                'message' => 'Product has been created successfully.' // for status 200
             ]);
         } catch (\Exception $exception) {
             \Log::error($exception->getMessage());
@@ -68,24 +68,24 @@ class CategoryController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Category  $category
+     * @param  \App\Models\Product  $Product
      * @return \Illuminate\Http\Response
      */
-    public function show(Category $category)
+    public function show(Product $Product)
     {
         //
         return response()->json([
-            'categories' => $category
+            'products' => $Product
         ]);
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Category  $category
+     * @param  \App\Models\Product  $Product
      * @return \Illuminate\Http\Response
      */
-    public function edit(Category $category)
+    public function edit(Product $Product)
     {
         //
     }
@@ -94,10 +94,10 @@ class CategoryController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Category  $category
+     * @param  \App\Models\Product  $Product
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Category $category)
+    public function update(Request $request, Product $Product)
     {
         //
         $request->validate([
@@ -107,32 +107,32 @@ class CategoryController extends Controller
         ]);
 
         try {
-            $category->fill($request->post())->update();
+            $Product->fill($request->post())->update();
 
             if ($request->hasFile('image')) {
 
                 // remove old image
-                if ($category->file('image')) {
-                    $exists = Storage::disk('public')->exists("category/image/{$category->image}");
+                if ($Product->file('image')) {
+                    $exists = Storage::disk('public')->exists("Product/image/{$Product->image}");
                     if ($exists) {
-                        Storage::disk('public')->delete("category/image/{$category->image}");
+                        Storage::disk('public')->delete("Product/image/{$Product->image}");
                     }
                 }
 
                 $imageName = Str::random() . '' . $request->image->getClientOriginalExtension();
-                Storage::disk('public')->putFileAs("category/image/", $request->image, $imageName);
-                $category->image = $imageName;
-                $category->save();
+                Storage::disk('public')->putFileAs("Product/image/", $request->image, $imageName);
+                $Product->image = $imageName;
+                $Product->save();
             }
 
             return response()->json([
-                'message' => 'Category updated successfully.' // for status 200
+                'message' => 'Product updated successfully.' // for status 200
             ]);
         } catch (\Exception $exception) {
             Log::error($exception->getMessage());
             return response()->json([
                 'error' => $exception->getMessage(),
-                'message' => 'Something goes wrong while updating a Category!!',
+                'message' => 'Something goes wrong while updating a Product!!',
             ]);
         }
     }
@@ -140,29 +140,29 @@ class CategoryController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Category  $category
+     * @param  \App\Models\Product  $Product
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Category $category)
+    public function destroy(Product $Product)
     {
         //
         try {
-            if ($category->image) {
-                $exists = Storage::disk('public')->exists("category/image/{$category->image}");
+            if ($Product->image) {
+                $exists = Storage::disk('public')->exists("Product/image/{$Product->image}");
                 if ($exists) {
-                    Storage::disk('public')->delete("category/image/{$category->image}");
+                    Storage::disk('public')->delete("Product/image/{$Product->image}");
                 }
             }
 
-            $category->delete();
+            $Product->delete();
 
             return response()->json([
-                'message' => 'category Deleted Successfully!!'
+                'message' => 'Product Deleted Successfully!!'
             ]);
         } catch (\Exception $e) {
             \Log::error($e->getMessage());
             return response()->json([
-                'message' => 'Something goes wrong while deleting a category!!'
+                'message' => 'Something goes wrong while deleting a Product!!'
             ]);
         }
     }
